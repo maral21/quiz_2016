@@ -33,37 +33,65 @@ exports.ownershipRequired = function(req, res, next){
 };
 
 
-// GET /quizzes
- exports.index = function(req,res,next){
 
+
+exports.index=function(req,res,next){
+  var formato = req.params.format;
+  if(formato==='json'){
+    models.Quiz.findALL().then(function(quizzes){
+      res.send(JSON.stringgify(quizzes));
+    }).catch(function(error){next(error);
+    });
+  }
+  else if ((req.params.format==='html') || (!req.params.format)){
    var search = req.query.search || "";
 
    if (search !== ""){
 
      buscar = "%"+search.replace(/ /g, "%")+"%";
-     models.Quiz.findAll({ where: ["question like ?", buscar ]}).then(function(quizzes){
+
+     models.Quiz.findAll({ where: ["question like ?", buscar]}).then(function(quizzes){
+
        quizzes.sort(function(x,y){
 
-        var resultado = x.question.localCompare(y.question);
+         return x.question.localeCompare(y.question);});
+       res.render('quizzes/index', { quizzes: quizzes, search: search });}).catch(function(error){ next(error); }); 
+   }
 
-         return resultado;
-
-       });
-       res.render('quizzes/index', { quizzes: quizzes, search: search });}).catch(function(error){ next(error); }); }
    else{
-   models.Quiz.findAll().then(function(quizzes){
-     res.render('quizzes/index', {quizzes: quizzes, search:search });
-   }).catch(function(error){ next(error); }); }
- };
 
-// GET /quizzes/:id
-exports.show = function(req, res, next) {
+    models.Quiz.findAll().then(function(quizzes){
 
-	var answer = req.query.answer || '';
+         res.render('quizzes/index', {quizzes: quizzes, search:search });
 
-	res.render('quizzes/show', {quiz: req.quiz,
-								answer: answer});
-};
+   }).catch(function(error){ next(error); }); 
+  } 
+  }else{
+    req.flash('error',"Formato no valido"); 
+  }
+  }
+ 
+
+// GET /quizzes/:id.:format?
+  exports.show = function(req,res,next){
+
+      var formato = req.params.format;
+      
+   if ((formato==='html') || (!req.params.format)){
+
+     var answer = req.query.answer || '';
+
+     res.render('quizzes/show', {quiz: req.quiz, answer: answer}); 
+   }
+   else if (formato === 'json'){
+
+     res.send(JSON.stringify(req.quiz));
+
+      }
+   else{
+     req.flash('error',"Formato no valido");
+      }
+  };
 
 
 // GET /quizzes/:id/check
