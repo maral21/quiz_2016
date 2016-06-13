@@ -23,6 +23,8 @@ router.param('userId', userController.load);  // autoload :userId
 router.param('commentId', commentController.load);  // autoload :commentId
 
 
+
+
 // Definición de rutas de sesion
 router.get('/session',    sessionController.new);     // formulario login
 router.post('/session',   sessionController.create);  // crear sesión

@@ -10,6 +10,7 @@ var flash = require('express-flash');
 var methodOverride = require('method-override');
 
 var routes = require('./routes/index');
+var sessionController = require('./controllers/session_controller');
 
 var app = express();
 
@@ -27,9 +28,13 @@ app.use(session({secret: "Quiz 2016",
                  resave: false,
                  saveUninitialized: true}));
 app.use(methodOverride('_method', {methods: ["POST", "GET"]}));
+//app.use(sessionController.autologout);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(partials());
+app.use(session({ 
+  secret: "Quiz 2016", resave: false, saveUninitialized: true 
+}));
 app.use(flash());
 
 // Helper dinamico:
@@ -41,6 +46,35 @@ app.use(function(req, res, next) {
    next();
 });
 
+app.use(function(req,res,next){
+  res.locals.session=req.session;
+  next();
+});
+
+app.use(function(req, res, next) {
+ 
+    if(!req.session.user) { 
+       next();
+ 
+    } else if(req.session.user && (req.session.user.expires < Date.now())) {
+
+       delete req.session.user;
+
+       next();
+ 
+    } else if (req.session.user && (req.session.user.expires > Date.now())) { 
+
+       req.session.user.expires = (Date.now() + 120000);
+       
+       next();
+ 
+    } else { 
+       next();
+    }
+ 
+ });
+
+  
 app.use('/', routes);
 
 // catch 404 and forward to error handler

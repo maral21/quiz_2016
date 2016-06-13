@@ -77,7 +77,9 @@ exports.adminAndNotMyselfRequired = function(req, res, next){
  * Si la autenticacion falla, la promesa se satisface pero devuelve null.
  */
 var authenticate = function(login, password) {
-    
+      var t1 = new Date();
+      var t2 = t1.getTime();
+      
     return models.User.findOne({where: {username: login}})
         .then(function(user) {
             if (user && user.verifyPassword(password)) {
@@ -97,10 +99,10 @@ var authenticate = function(login, password) {
 // query (si no existe uso /).
 //
 exports.new = function(req, res, next) {
-
+    // var user = req.session.user;
     var redir = req.query.redir || 
                 url.parse(req.headers.referer || "/").pathname;
-
+    
     // No volver al formulario de login ni al de registro.
     if (redir === '/session' || redir === '/users/new') {
         redir = "/";
@@ -123,7 +125,7 @@ exports.create = function(req, res, next) {
             if (user) {
     	        // Crear req.session.user y guardar campos id y username
     	        // La sesión se define por la existencia de: req.session.user
-    	        req.session.user = {id:user.id, username:user.username, isAdmin:user.isAdmin};
+    	        req.session.user = {id:user.id, username:user.username, isAdmin:user.isAdmin, expires:(Date.now() + 120000)};
 
                 res.redirect(redir); // redirección a redir
             } else {
@@ -136,6 +138,7 @@ exports.create = function(req, res, next) {
             next(error);        
     });
 };
+
 
 
 // DELETE /session   -- Destruir sesion 

@@ -8,6 +8,7 @@ exports.load = function(req, res, next, quizId) {
   		.then(function(quiz) {
       		if (quiz) {
         		req.quiz = quiz;
+            //models.Quiz.findById(quizId, {include: [models.Comment, models.Attachment]});
         		next();
       		} else { 
       			throw new Error('No existe quizId=' + quizId);

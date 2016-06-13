@@ -78,6 +78,10 @@ exports.create = function(req, res, next) {
         });
 };
 
+// exports.updateLogoutTime = function() {
+    
+//   };
+
 
 // GET /users/:id/edit
 exports.edit = function(req, res, next) {
